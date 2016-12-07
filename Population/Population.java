@@ -4,7 +4,6 @@ import Individual.Individual;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Random;
 
 import static Config.Configuration.*;
 
@@ -16,14 +15,27 @@ public class Population {
     public ArrayList<Individual> individuals = new ArrayList<Individual>();
     public ArrayList<Individual> mutations = new ArrayList<Individual>();
 
-    public String name = "";
     public double fitness = 0;
 
     // Constructor
-    public Population(String name) {
-        this.name = name;
+    public Population() {
+
         this.initialize();
-        this.update();
+
+        calcFitness();
+
+        // calc probability
+        calcProbability();
+
+        // calc fitness for total population
+        this.fitness = calcFitnessTotal();
+
+        // sort list
+        sortPopulationByFitness();
+
+        if (individuals.get(0).fitness > BEST_FITNESS) {
+            BEST_FITNESS = individuals.get(0).fitness;
+        }
     }
 
     // create list with individuals
@@ -72,6 +84,10 @@ public class Population {
     // sorted population with updated fitness
     public void update() {
         // calculate fitness for each individual
+
+        this.individuals = (ArrayList<Individual>) this.mutations.clone();
+
+        // calc fitness of each Individual
         calcFitness();
 
         // calc probability
@@ -83,23 +99,33 @@ public class Population {
         // sort list
         sortPopulationByFitness();
 
-        if (individuals.get(0).fitness > BEST_FITNESS)
-            BEST_FITNESS = individuals.get(0).fitness;
+//        if (individuals.get(0).fitness > BEST_FITNESS)
+        BEST_FITNESS = individuals.get(0).fitness;
 
         // print total population
 //        if (name == "BASIC GENERATION")
 //            this.printPopulation();
 
+        this.mutations.clear();
     }
 
     public void printPopulation() {
         System.out.println("--------------------------------------------------------------------------------------------------------------------------------------");
 
-        System.out.println("<< " + name+ " >> "+ " Generation: " + GENERATION_COUNTER + " - Size: " + this.individuals.size() + " - best fitness:" + BEST_FITNESS + " - current best:" + individuals.get(0).fitness);
-
+        System.out.println("Generation: " + GENERATION_COUNTER + " - Size: " + this.individuals.size() + " - best fitness:" + BEST_FITNESS);
+        System.out.println("Population fitness: " + this.fitness);
         // iterate over all individuals
         for (Individual in: individuals) {
             System.out.println("["+individuals.indexOf(in)+"] " + in.toString());
         }
     }
+
+    public void printPopulationOverview() {
+        System.out.println("--------------------------------------------------------------------------------------------------------------------------------------");
+
+        System.out.println("Generation: " + GENERATION_COUNTER + " - Size: " + this.individuals.size() + " - BEST_FITNESS:" + BEST_FITNESS + " FINTESS_THRESHOLD: " + FITNESS_THRESHOLD);
+        System.out.println("Population fitness: " + this.fitness);
+        individuals.get(0).toString();
+    }
+
 }
