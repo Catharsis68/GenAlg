@@ -1,5 +1,6 @@
 import Individual.Individual;
 import Population.Population;
+import com.sun.org.apache.bcel.internal.generic.POP;
 
 import java.util.*;
 import static Config.Configuration.*;
@@ -20,7 +21,6 @@ public class GenAlg {
 
     public GenAlg() {
 
-        nextGeneration.individuals.clear();
         run();
     }
 
@@ -37,9 +37,14 @@ public class GenAlg {
 
             evolve(population);
 
-            population.printPopulation();
+//            population.printPopulation();
+            population.printPopulationOverview();
 
-        } while (GENERATION_COUNTER < 5);
+        } while (GENERATION_COUNTER < 5 || BEST_FITNESS < FITNESS_THRESHOLD);
+
+
+        System.out.println("evolution done BEST_FITNESS " + BEST_FITNESS + " FITNESS_THRESHOLD " + FITNESS_THRESHOLD);
+        population.printPopulationOverview();
     }
 
     private void evolve(Population population) {
@@ -66,7 +71,7 @@ public class GenAlg {
 
         // die besten x Individuen werden in die nächste Generation übernommen
         for (int i=0; i<NUMBER_OF_SELECTIONS; i++) {
-            nextGeneration.individuals.add(population.individuals.get(i));
+            population.mutations.add(population.individuals.get(i));
 //            /* DEBUG */ System.out.println("TOP 10 " + nextGeneration.individuals.get(i).toString());
         }
     }
@@ -74,7 +79,7 @@ public class GenAlg {
     // 2. Step CROSSOVER - alte generation wird crossover gemacht
     public void crossover(Population population) {
         Random rnd = new Random();
-        int maximum = population.individuals.size(); // alle 100 Individueen stehen zur Auswahl für crossover
+        int maximum = population.individuals.size(); // alle Individueen stehen zur Auswahl für crossover
         int minimum = 0;
         int range = maximum - minimum;
 
@@ -92,11 +97,7 @@ public class GenAlg {
             Individual mother = population.individuals.get(motherIndex);
 
             // crossover beim  Individuum zwischen bitstring pos: 20-80
-            minimum = 20;
-            maximum = 80;
-            range = maximum - minimum;
-
-            int crossoverPos = rnd.nextInt(range) + minimum;
+            int crossoverPos = rnd.nextInt(BITSTRING_SIZE) + 0;
 //             System.out.println("crossover pos: " + crossoverPos);
 
             // create new individual
@@ -121,7 +122,6 @@ public class GenAlg {
 
             population.mutations.add(child1); // werden im nächsten schritt mutiert
             population.mutations.add(child2); // werden im nächsten schritt mutiert
-            population.update();
         }
     }
 
@@ -132,23 +132,16 @@ public class GenAlg {
     // gewähltes Bit
         Random rnd = new Random();
         int maximum = population.mutations.size();
-        int minimum = NUMBER_OF_SELECTIONS;
+        int minimum = 2;
         int range = maximum - minimum;
 
+        // alle Individuen mutieren
         for (int k=0; k<MUTATIONRATE; k++) {
 
             int randomIndividualOfNextGeneration = rnd.nextInt(range) + minimum;
+            Individual mutation = population.mutations.remove(randomIndividualOfNextGeneration);
 
-            System.out.println("mutate index: " + randomIndividualOfNextGeneration);
-            Individual mutation = population.mutations.get(randomIndividualOfNextGeneration);
-
-            mutation.mutate();
-
-            nextGeneration.individuals.add(mutation);
+            population.mutations.add(population.mutations.size(), mutation.mutate());
         }
-        population.individuals = (ArrayList<Individual>) nextGeneration.individuals.clone();
-        population.update();
-        population.mutations.clear();
-        nextGeneration.individuals.clear();
     }
 }
