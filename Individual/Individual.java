@@ -32,17 +32,23 @@ public class Individual implements Comparable<Individual> {
     }
 
     // Bitvertauschung für ein Individuum
-    public void mutate() {
+    public Individual mutate() {
         Random rnd = new Random();
+        int maximum = BITSTRING_SIZE; // alle 100 Individueen stehen zur Auswahl für crossover
+        int minimum = 0;
+        int range = maximum - minimum;
+
         // switch bits
         for (int i=0; i<NUMBER_OF_PERMUTATIONS;i++) {
-            int bitstringPos = rnd.nextInt(POPULATION_SIZE) + 0;
+            int bitstringPos = rnd.nextInt(range) + minimum;
 
-            if (this.bitstring[bitstringPos] == 0)
+            if (this.bitstring[bitstringPos] == 0) {
                 this.bitstring[bitstringPos] = 1;
-
-            this.bitstring[bitstringPos] = 0;
+            } else {
+                this.bitstring[bitstringPos] = 0;
+            }
         }
+        return this;
     }
 
     public void calcFitness() {
